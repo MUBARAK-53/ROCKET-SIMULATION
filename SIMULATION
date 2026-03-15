@@ -1,0 +1,114 @@
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+#include <Gl/gl.h>
+
+using namespace std;
+
+#include <iostream>
+//g++ Practice_sim.cpp -o Practice_sim.exe -Iglfw\include -Lglfw\lib-mingw-w64 -lglfw3 -lopengl32 -lgdi32 -luser32
+int main() {
+    // 1. MUST INIT GLFW FIRST
+    if (!glfwInit()) {
+        cout << "GLFW init failed!" << endl;
+        return -1;
+    }
+
+    // 2. CREATE WINDOW
+    GLFWwindow *window = glfwCreateWindow(1000, 700, "HEY EVERYONE", NULL, NULL);
+    
+    // 3. CHECK IF WINDOW CREATED
+    if (!window) {
+        cout << "Window creation failed!" << endl;
+        glfwTerminate();
+        return -1;
+    }
+
+    glfwMakeContextCurrent(window);
+    glViewport(0,0,1000,700);
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
+    float start_pos=-0.6f;//bottom position
+    float velocity=0.0;
+    float thrust=0.17f;
+    float gravity=-0.16f;
+    float dt=0.008;
+
+    
+     //4. MAIN LOOP (Perfect!)
+    while (!glfwWindowShouldClose(window)) {
+        glfwPollEvents();           // Process input
+        glClearColor(0.2f, 0.4f, 0.8f, 1.0f);  
+        glClear(GL_COLOR_BUFFER_BIT);
+        
+        
+        //Movement of rocket
+        float accln=thrust+gravity;
+        velocity+=accln*dt;
+        start_pos+=velocity*dt;
+
+        if(start_pos>0.9f)
+        {
+            start_pos=-0.6f;
+            velocity=0.0f;
+
+        }
+        glPushMatrix();
+        glScalef(0.3f,0.3f,1.0f);
+         glTranslatef(0.0f,start_pos,0.0f);
+
+
+
+    // === ROCKET BODY (gray cylinder) ===
+    glColor3f(0.7f, 0.7f, 0.8f);
+    glBegin(GL_LINES);
+    glVertex2f(-0.15f, -0.6f);    // Ground
+    glVertex2f(-0.15f, start_pos); // Rocket position
+    glEnd();
+    
+    glBegin(GL_QUADS);
+    glVertex2f(-0.08f, -0.6f);
+    glVertex2f( 0.08f, -0.6f);
+    glVertex2f( 0.08f, -0.1f);
+    glVertex2f(-0.08f, -0.1f);
+    glEnd();
+
+    // === NOSE CONE (red triangle) ===
+    glColor3f(0.9f, 0.1f, 0.1f);
+    glBegin(GL_TRIANGLES);
+    glVertex2f(-0.08f, -0.1f);
+    glVertex2f( 0.08f, -0.1f);
+    glVertex2f( 0.00f,  0.2f);
+    glEnd();
+
+    // === FINS (3 black triangles, bottom) ===
+    glColor3f(0.1f, 0.1f, 0.1f);
+    glBegin(GL_TRIANGLES);
+    // Left fin
+    glVertex2f(-0.12f, -0.6f);
+    glVertex2f(-0.08f, -0.6f);
+    glVertex2f(-0.20f, -0.8f);
+    // Right fin  
+    glVertex2f( 0.12f, -0.6f);
+    glVertex2f( 0.08f, -0.6f);
+    glVertex2f( 0.20f, -0.8f);
+    glEnd();
+
+    // === FLAMES (orange quad + yellow inner) ===
+    glColor3f(1.0f, 0.4f, 0.0f);  // Orange
+    glBegin(GL_QUADS);
+    glVertex2f(-0.15f, -0.75f);
+    glVertex2f( 0.15f, -0.75f);
+    glVertex2f( 0.06f,  -0.6f);
+    glVertex2f(-0.06f,  -0.6f);
+    glEnd();
+
+    glPopMatrix();
+    
+    glfwSwapBuffers(window);    // Show frame
+
+    
+}
+
+    glfwTerminate();
+    return 0;
+}
